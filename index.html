@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>Leaflet Geo Homework</title>
+	<link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet/v0.7.7/leaflet.css" /> <!-- leaflet css file -->
+	<script type="text/javascript" src="http://cdn.leafletjs.com/leaflet/v0.7.7/leaflet.js"></script>
+	<style type="text/css">
+		#mymap {
+			height: 700px;
+		}
+		.legend {
+		    line-height: 18px;
+		    color: #555;
+		}
+		.legend i {
+		    width: 18px;
+		    height: 18px;
+		    float: left;
+		    margin-right: 8px;
+		    opacity: 0.7;
+		}			
+	</style>
+</head>
+<body>
+	<h1 style="text-align: center;">Number of Firms with 500+ Employees</h1>
+	<!-- div container for map -->
+	<div id="mymap"></div>
+	<!-- data -->
+	<script type="text/javascript" src="firm_cnts_by_st.js"></script> 
+	<script type="text/javascript">
+		//map setup including longitude/latitude start and zoom level
+		var themap = L.map('mymap').setView([37.8,-96],4);
+		/*add map from mapbox (url, object)*/
+		L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}', {
+			attribution: "© <a href='https://www.mapbox.com/map-feedback/'>Mapbox</a> © <a href='http://www.openstreetmap.org/copyright'>OpenStreetMap</a>",
+			id: 'dandawg.pm8hmang',
+			maxZoom: 18, 
+			accessToken: 'pk.eyJ1IjoiZGFuZGF3ZyIsImEiOiJjaW16MzlnbHUwNGF1d2tsdWRtZjYyNTViIn0.NunHcJRmj30LkVz0J1N16g',
+		}).addTo(themap);
+
+		function getColor(d) {
+ 		   return d > 5000 ? '#001433' :
+	           d > 4000  ? '#003380' :
+	           d > 3000  ? '#0052cc' :
+	           d > 2000  ? '#1a75ff' :
+	           d > 1000   ? '#66a3ff' :
+	                      '#b3d1ff';
+		}
+
+		function style(feature) {
+		    return {
+		        fillColor: getColor(feature.properties.firm_cnt),
+		        weight: 2,
+		        opacity: 1,
+		        color: 'white',
+		        fillOpacity: 1
+		    };
+		}
+		L.geoJson(statesData, {style: style}).addTo(themap);
+
+		var legend = L.control({position: 'topright'});
+
+		legend.onAdd = function (map) {
+
+		    var div = L.DomUtil.create('div', 'info legend'),
+		        grades = [0,1000,2000,3000,4000,5000],
+		        labels = [];
+
+		    // loop through our density intervals and generate a label with a colored square for each interval
+		    for (var i = 0; i < grades.length; i++) {
+		        div.innerHTML +=
+		            '<i style="background:' + getColor(grades[i] + 1) + '"></i> ' +
+		            grades[i] + (grades[i + 1] ? '&ndash;' + grades[i + 1] + '<br>' : '+');
+		    }
+
+		    return div;
+		};
+
+		legend.addTo(themap);		
+	</script>
+	<!-- data source -->
+	<a href="http://www.census.gov/econ/susb/">Data from US Census Bureau: Statistics of U.S. Businesses</a>
+</body>
+</html>
